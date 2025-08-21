@@ -1,0 +1,26 @@
+{
+  "name": "activity_fetcher",
+  "version": "1.0.0",
+  "description": "Strava activity fetcher with rate limiting",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "analyze": "node src/utils/analyze.js",
+    "validate": "node src/auth/validate-token.js",
+    "oauth": "node src/auth/oauth.js",
+    "auth": "node src/auth/manual-auth.js",
+    "split": "node src/commands/split-activities.js",
+    "migrate": "node src/commands/migrate.js",
+    "manage": "node src/utils/activity-manager.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["strava", "activities", "api"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0"
+  }
+}
