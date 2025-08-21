@@ -1,5 +1,5 @@
 require('dotenv').config();
-const StravaActivityFetcher = require('./index.js');
+const StravaActivityFetcher = require('../../index.js');
 
 class TestFetcher extends StravaActivityFetcher {
     async fetchActivities(page = 1, perPage = 5) { // Limit to 5 activities for testing

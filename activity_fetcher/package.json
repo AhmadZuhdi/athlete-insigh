@@ -14,6 +14,8 @@
     "split": "node src/commands/split-activities.js",
     "migrate": "node src/commands/migrate.js",
     "manage": "node src/utils/activity-manager.js",
+    "streams": "node src/commands/fetch-streams.js",
+    "streams-all": "node src/commands/fetch-all-streams.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["strava", "activities", "api"],
