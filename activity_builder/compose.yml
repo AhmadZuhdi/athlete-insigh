@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - athlete-insight-network
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-app
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    env_file: .env
+    volumes:
+      - .:/app
+      - /app/__pycache__
+      - ../activity_fetcher/data:/data
+    working_dir: /app
+    environment:
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+    networks:
+      - athlete-insight-network
+    ports:
+      - "5000:5000"
+    # Uncomment the following lines when you have a Python application to run
+    # command: python main.py
+    # or for development with auto-reload:
+    # command: python -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+    stdin_open: true
+    tty: true
+
+volumes:
+  chroma_data:
+    driver: local
+
+networks:
+  athlete-insight-network:
+    driver: bridge
