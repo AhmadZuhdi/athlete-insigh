@@ -33,6 +33,18 @@ class StravaStoryGenerator:
         self.chroma_client = None
         self.collection = None
         
+        # Check for USER_BIRTHYEAR environment variable for HR zone calculations
+        birth_year = os.getenv('USER_BIRTHYEAR')
+        if birth_year:
+            try:
+                age = datetime.now().year - int(birth_year)
+                max_hr = 220 - age
+                print(f"🎂 Using USER_BIRTHYEAR ({birth_year}) for HR zones. Estimated max HR: {max_hr} bpm")
+            except (ValueError, TypeError):
+                print("⚠️  Invalid USER_BIRTHYEAR format. Expected 4-digit year (e.g., 1990)")
+        else:
+            print("ℹ️  Set USER_BIRTHYEAR environment variable for personalized HR zone calculations")
+        
         # Story templates and patterns
         self.weather_descriptors = [
             "sunny morning", "crisp afternoon", "pleasant evening", "foggy morning",
@@ -224,13 +236,13 @@ class StravaStoryGenerator:
         df['season'] = df['month'].apply(self._get_season)
     
     def _determine_effort_level(self, row):
-        """Determine effort level based on HR and speed data."""
+        """Determine effort level based on HR zones calculated from user's max HR."""
         hr_avg = row.get('hr_stream_avg', row.get('average_heartrate', 0))
         speed = row.get('average_speed_kmh', 0)
         activity_type = row.get('type', 'Unknown')
         
         if pd.isna(hr_avg) or hr_avg == 0:
-            # Use speed-based estimation
+            # Use speed-based estimation when HR data is not available
             if activity_type == 'Ride':
                 if speed < 15: return "easy"
                 elif speed < 25: return "moderate"
@@ -244,11 +256,60 @@ class StravaStoryGenerator:
             else:
                 return "moderate"
         else:
-            # Use HR-based estimation
-            if hr_avg < 130: return "easy"
-            elif hr_avg < 150: return "moderate"
-            elif hr_avg < 170: return "hard"
-            else: return "very_hard"
+            # Use HR zone-based estimation
+            max_hr = self._calculate_max_hr()
+            if max_hr is None:
+                # Fallback to generic HR zones if birth year not available
+                if hr_avg < 130: return "easy"
+                elif hr_avg < 150: return "moderate"
+                elif hr_avg < 170: return "hard"
+                else: return "very_hard"
+            
+            # Calculate HR percentage and determine zone
+            hr_percentage = (hr_avg / max_hr) * 100
+            
+            # HR Zone-based effort levels:
+            # Zone 1 (50-60%): Active Recovery/Easy
+            # Zone 2 (60-70%): Aerobic Base/Easy-Moderate
+            # Zone 3 (70-80%): Aerobic Threshold/Moderate
+            # Zone 4 (80-90%): Lactate Threshold/Hard
+            # Zone 5 (90%+): VO2 Max/Very Hard
+            
+            if hr_percentage < 60: return "easy"
+            elif hr_percentage < 70: return "easy"  # Zone 2 lower
+            elif hr_percentage < 80: return "moderate"  # Zone 3
+            elif hr_percentage < 90: return "hard"  # Zone 4
+            else: return "very_hard"  # Zone 5
+    
+    def _calculate_max_hr(self):
+        """Calculate maximum heart rate based on user's birth year from environment."""
+        try:
+            birth_year = os.getenv('USER_BIRTHYEAR')
+            if not birth_year:
+                print("⚠️  USER_BIRTHYEAR environment variable not set. Using fallback HR zones.")
+                return None
+            
+            current_year = datetime.now().year
+            age = current_year - int(birth_year)
+            
+            # Using the most common formula: 220 - age
+            # Note: More accurate formulas exist (like 208 - (0.7 * age)) but 220-age is widely used
+            max_hr = 220 - age
+            
+            # Sanity check
+            if age < 10 or age > 100:
+                print(f"⚠️  Calculated age ({age}) seems unusual. Please check USER_BIRTHYEAR.")
+                return None
+            
+            if max_hr < 120 or max_hr > 220:
+                print(f"⚠️  Calculated max HR ({max_hr}) seems unusual for age {age}.")
+                return None
+            
+            return max_hr
+            
+        except (ValueError, TypeError) as e:
+            print(f"⚠️  Error calculating max HR from USER_BIRTHYEAR: {e}")
+            return None
     
     def _determine_terrain_type(self, row):
         """Determine terrain type based on elevation gain."""

@@ -53,32 +53,46 @@ Strava JSON Files → Stream Processing → Analytics Engine → Natural Languag
 
 ## 📁 Project Structure
 
-```
-activity_builder/
-├── compose.yml              # Docker orchestration
-├── Dockerfile              # Python environment
-├── requirements.txt         # Dependencies
-├── .env                    # Environment configuration
-├── story_generator.py      # Main analytics & story generation (551 lines)
-├── search_demo.py          # Interactive search interface
-├── web_search.py           # Flask web application
-├── enhanced_analyzer.py    # Advanced analytics engine
-├── quick_stats.py          # Fast overview statistics
-├── activity_analyzer.py    # Basic analysis tools
-└── test_setup.py          # Environment validation
+The project has been reorganized for better maintainability and clarity:
 
-activity_fetcher/data/
-├── individual_activities/   # 144 activity JSON files
-│   ├── *_streams_*.json    # 559 stream data files
-│   └── *.json             # Activity metadata files
-└── metadata/              # Additional data files
 ```
+📁 src/core/          # Main application modules
+📁 src/utils/         # Utility functions
+📁 examples/          # Demo scripts and examples  
+📁 legacy/            # Deprecated/old code
+📁 docker/            # Container configuration
+📁 data/              # Analysis outputs
+📁 scripts/           # Shell scripts
+📁 reports/           # Generated reports
+```
+
+**Key Files:**
+- `main.py` - Main application entry point
+- `launcher.py` - Interactive launcher for all tools
+- `src/core/interactive_analyzer.py` - Core analyzer with AI integration
+- `src/core/story_generator.py` - Activity story generation
+
+For detailed structure documentation, see [README_structure.md](README_structure.md).
 
 ## 🚀 Usage Examples
 
+### Quick Start (Recommended)
+```bash
+# Use the launcher for easy access to all tools
+python launcher.py
+
+# Or run the main interactive analyzer directly
+python main.py
+```
+
 ### Command Line Search
 ```bash
-docker-compose exec python-app python search_demo.py
+# Using Docker
+cd docker && docker-compose up -d
+docker-compose exec python-app python main.py
+
+# Or run examples directly
+python examples/search_demo.py
 ```
 
 ### Web Interface
@@ -88,7 +102,11 @@ http://localhost:5000
 
 ### Direct Analytics
 ```bash
-docker-compose exec python-app python story_generator.py
+# Run story generation
+python src/core/story_generator.py
+
+# Or use the interactive analyzer
+python src/core/interactive_analyzer.py
 ```
 
 ## 📈 Sample Insights

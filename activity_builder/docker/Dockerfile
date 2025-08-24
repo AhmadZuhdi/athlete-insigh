@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file (create this file to add Python dependencies)
+# Copy requirements and source code
 COPY requirements.txt* ./
+COPY src/ ./src/
+COPY main.py ./
 
 # Install Python dependencies if requirements.txt exists
 RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
