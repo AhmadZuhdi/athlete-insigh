@@ -25,9 +25,9 @@ services:
     container_name: python-app
     env_file: .env
     volumes:
-      - .:/app
+      - ../:/app
       - /app/__pycache__
-      - ../activity_fetcher/data:/data
+      - ../../activity_fetcher/data:/data
     working_dir: /app
     environment:
       - CHROMA_HOST=chromadb

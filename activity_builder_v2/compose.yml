@@ -1,0 +1,22 @@
+services:
+  python-app:
+    build:
+      context: .
+    container_name: python-app-v2
+    env_file: .env
+    volumes:
+      - ./:/app
+      - /app/__pycache__
+      - ./../activity_fetcher/data:/data
+    working_dir: /app
+
+    networks:
+      - athlete-insight-network
+    ports:
+      - "5000:5000"
+    stdin_open: true
+    tty: true
+
+networks:
+  athlete-insight-network:
+    driver: bridge
